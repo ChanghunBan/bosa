@@ -1,0 +1,718 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>bosch save - cosmos-reason1-7b</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      * {
+        box-sizing: border-box;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+
+      body {
+        margin: 0;
+        padding: 24px;
+        background: #050816;
+        color: #f9fafb;
+      }
+
+      h1 {
+        margin-bottom: 4px;
+      }
+
+      .subtitle {
+        color: #9ca3af;
+        margin-bottom: 24px;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 1.3fr 1fr;
+        gap: 24px;
+      }
+
+      @media (max-width: 960px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .panel {
+        background: radial-gradient(circle at top left, #111827, #020617 55%);
+        border-radius: 16px;
+        padding: 16px 18px 18px;
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.85);
+      }
+
+      .panel-title {
+        font-size: 15px;
+        font-weight: 600;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .badge {
+        font-size: 11px;
+        padding: 2px 8px;
+        border-radius: 999px;
+        border: 1px solid rgba(148, 163, 184, 0.6);
+        color: #e5e7eb;
+      }
+
+      .field-label {
+        font-size: 13px;
+        font-weight: 500;
+        margin-bottom: 4px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .field-description {
+        font-size: 12px;
+        color: #9ca3af;
+        margin-bottom: 8px;
+      }
+
+      .card {
+        border-radius: 12px;
+        border: 1px solid rgba(55, 65, 81, 0.8);
+        background: radial-gradient(circle at top left, #020617, #020617 60%);
+        padding: 10px 11px 11px;
+        margin-bottom: 10px;
+      }
+
+      .file-drop {
+        border-radius: 10px;
+        border: 1px dashed rgba(75, 85, 99, 0.9);
+        padding: 18px;
+        text-align: center;
+        cursor: pointer;
+        background: rgba(15, 23, 42, 0.85);
+      }
+
+      .file-drop:hover {
+        border-color: #38bdf8;
+        background: rgba(15, 23, 42, 0.9);
+      }
+
+      .file-drop span {
+        display: block;
+        font-size: 13px;
+      }
+
+      .file-name {
+        margin-top: 8px;
+        font-size: 12px;
+        color: #e5e7eb;
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 76px;
+        resize: vertical;
+        border-radius: 10px;
+        border: 1px solid rgba(75, 85, 99, 0.9);
+        padding: 8px 9px;
+        font-size: 13px;
+        background: rgba(15, 23, 42, 0.9);
+        color: #e5e7eb;
+      }
+
+      textarea:focus {
+        outline: none;
+        border-color: #38bdf8;
+        box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4);
+      }
+
+      .token-counter {
+        font-size: 11px;
+        color: #9ca3af;
+      }
+
+      .row {
+        display: flex;
+        gap: 10px;
+      }
+
+      .row > .card {
+        flex: 1;
+      }
+
+      .slider-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .slider-row input[type="range"] {
+        flex: 1;
+      }
+
+      input[type="range"] {
+        accent-color: #38bdf8;
+      }
+
+      input[type="number"] {
+        width: 72px;
+        border-radius: 8px;
+        border: 1px solid rgba(75, 85, 99, 0.9);
+        padding: 4px 6px;
+        font-size: 12px;
+        background: rgba(15, 23, 42, 0.9);
+        color: #e5e7eb;
+      }
+
+      button.run-btn {
+        width: 100%;
+        margin-top: 8px;
+        padding: 10px;
+        border-radius: 999px;
+        border: none;
+        background: linear-gradient(90deg, #38bdf8, #22c55e);
+        color: #020617;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      button.run-btn:disabled {
+        opacity: 0.6;
+        cursor: default;
+      }
+
+      .output {
+        font-size: 13px;
+        white-space: pre-wrap;
+        line-height: 1.5;
+      }
+
+      .output-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+        font-size: 13px;
+        color: #9ca3af;
+      }
+
+      .video-preview {
+        margin-top: 8px;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid rgba(55, 65, 81, 0.9);
+        background: #020617;
+      }
+
+      .video-preview video {
+        width: 100%;
+        display: block;
+        max-height: 260px;
+      }
+
+      .small-text {
+        font-size: 11px;
+        color: #6b7280;
+      }
+
+      .reasoning-toggle {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>bosch save</h1>
+    <div class="subtitle">
+      Bosch save - 직접 영상을 올려 창고/현장 상황을 분석해 볼 수 있는
+      로컬 경험 UI입니다.
+    </div>
+
+    <div class="layout">
+      <div class="panel">
+        <div class="panel-title">
+          Experience
+          <span class="badge">Video + Prompt</span>
+        </div>
+
+        <div class="card">
+          <div class="field-label">
+            <span>Video Input</span>
+          </div>
+          <div class="field-description">
+            .mp4 영상을 업로드하거나, 스마트폰으로 촬영한 영상을 PC로 옮겨서 사용하세요.
+          </div>
+          <label class="file-drop">
+            <span id="file-drop-text">여기를 클릭하거나 드래그해서 .mp4 업로드</span>
+            <input
+              id="video-input"
+              type="file"
+              accept="video/mp4,video/*"
+              style="display: none"
+            />
+            <div id="file-name" class="file-name"></div>
+            <div id="frame-status" class="small-text"></div>
+          </label>
+          <div class="video-preview" id="video-preview" style="display: none">
+            <video id="video-element" controls></video>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="field-label">
+            <span>User Prompt</span>
+            <span id="user-token" class="token-counter">0 tokens (대략)</span>
+          </div>
+          <div class="field-description">
+            모델에게 하고 싶은 질문/지시를 자연어로 적어 주세요. (권장: 20~150 tokens, 최대 250 tokens 근처)
+          </div>
+          <textarea
+            id="user-prompt"
+            placeholder="예) Which worker picked up the dropped box?"
+          ></textarea>
+        </div>
+
+        <div class="card">
+          <div class="field-label">
+            <span>System Prompt</span>
+            <span id="system-token" class="token-counter">0 tokens (대략)</span>
+          </div>
+          <div class="field-description">
+            세션 전체에 대한 역할/규칙을 정의합니다. NVIDIA 데모에 있는 포맷과 유사하게
+            &lt;think&gt; 블록을 포함할 수 있습니다.
+          </div>
+          <textarea id="system-prompt"></textarea>
+          <div class="reasoning-toggle">
+            <input type="checkbox" id="reasoning-toggle" checked />
+            <label for="reasoning-toggle">Reasoning 형식 &lt;think&gt; 블록 사용</label>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="card">
+            <div class="field-label">
+              <span>Temperature</span>
+              <span id="temp-label" class="small-text">0.6</span>
+            </div>
+            <div class="slider-row">
+              <input
+                id="temp"
+                type="range"
+                min="0"
+                max="1"
+                step="0.05"
+                value="0.6"
+              />
+            </div>
+          </div>
+          <div class="card">
+            <div class="field-label">
+              <span>Top P</span>
+              <span id="top-p-label" class="small-text">0.95</span>
+            </div>
+            <div class="slider-row">
+              <input
+                id="top-p"
+                type="range"
+                min="0"
+                max="1"
+                step="0.05"
+                value="0.95"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="card">
+            <div class="field-label">
+              <span>Repetition Penalty</span>
+              <span id="rep-label" class="small-text">1.05</span>
+            </div>
+            <div class="slider-row">
+              <input
+                id="repetition"
+                type="range"
+                min="0.8"
+                max="2"
+                step="0.05"
+                value="1.05"
+              />
+            </div>
+          </div>
+          <div class="card">
+            <div class="field-label">
+              <span>FPS (video sampling)</span>
+              <span id="fps-label" class="small-text">4</span>
+            </div>
+            <div class="slider-row">
+              <input
+                id="fps"
+                type="range"
+                min="1"
+                max="8"
+                step="1"
+                value="4"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="card">
+            <div class="field-label">
+              <span>Seed</span>
+            </div>
+            <input id="seed" type="number" placeholder="예: 21" />
+            <div class="small-text">고정하면 출력 일관성이 조금 올라갑니다.</div>
+          </div>
+          <div class="card">
+            <div class="field-label">
+              <span>Max Tokens</span>
+            </div>
+            <input id="max-tokens" type="number" value="256" />
+            <div class="small-text">답변 최대 토큰 수 (예: 256)</div>
+          </div>
+        </div>
+
+        <button class="run-btn" id="run-btn">
+          <span id="run-text">Run bosch save</span>
+          <span id="run-spinner" style="display: none">…</span>
+        </button>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">
+          Output
+          <span class="badge">Model Response</span>
+        </div>
+        <div class="card" style="min-height: 220px">
+          <div class="output-header">
+            <span>cosmos-reason1-7b 응답</span>
+            <span id="usage-info" class="small-text"></span>
+          </div>
+          <div id="output" class="output">
+            아직 실행 전입니다. 왼쪽에서 영상을 업로드하고 프롬프트를 작성한 뒤, “Run bosch save” 버튼을 눌러보세요.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <video id="hidden-video" style="display: none"></video>
+    <canvas id="hidden-canvas" style="display: none"></canvas>
+
+    <script>
+      const videoInput = document.getElementById("video-input");
+      const fileDropText = document.getElementById("file-drop-text");
+      const fileNameEl = document.getElementById("file-name");
+      const frameStatusEl = document.getElementById("frame-status");
+      const videoPreview = document.getElementById("video-preview");
+      const videoElement = document.getElementById("video-element");
+
+      const userPromptEl = document.getElementById("user-prompt");
+      const systemPromptEl = document.getElementById("system-prompt");
+      const userTokenEl = document.getElementById("user-token");
+      const systemTokenEl = document.getElementById("system-token");
+      const reasoningToggleEl = document.getElementById("reasoning-toggle");
+
+      const tempEl = document.getElementById("temp");
+      const topPEl = document.getElementById("top-p");
+      const repetitionEl = document.getElementById("repetition");
+      const fpsEl = document.getElementById("fps");
+      const seedEl = document.getElementById("seed");
+      const maxTokensEl = document.getElementById("max-tokens");
+
+      const tempLabel = document.getElementById("temp-label");
+      const topPLabel = document.getElementById("top-p-label");
+      const repLabel = document.getElementById("rep-label");
+      const fpsLabel = document.getElementById("fps-label");
+
+      const runBtn = document.getElementById("run-btn");
+      const runText = document.getElementById("run-text");
+      const runSpinner = document.getElementById("run-spinner");
+
+      const outputEl = document.getElementById("output");
+      const usageInfoEl = document.getElementById("usage-info");
+
+      const hiddenVideo = document.getElementById("hidden-video");
+      const hiddenCanvas = document.getElementById("hidden-canvas");
+
+      let selectedFile = null;
+      let extractedFrames = [];
+
+      function approxTokens(text) {
+        if (!text) return 0;
+        return Math.ceil(text.trim().length / 4);
+      }
+
+      function updateTokenCounters() {
+        userTokenEl.textContent = `${approxTokens(
+          userPromptEl.value
+        )} tokens (대략)`;
+        systemTokenEl.textContent = `${approxTokens(
+          systemPromptEl.value
+        )} tokens (대략)`;
+      }
+
+      function setDefaultSystemPrompt() {
+        const base = `You are a helpful warehouse monitoring system. The provided video is a processed clip where each worker is overlaid with an ID. You must refer to the worker based on the ID overlaid on the worker in the video.`;
+
+        if (reasoningToggleEl.checked) {
+          systemPromptEl.value = `${base}
+
+<think>
+your reasoning, with reference to worker IDs shown in the video
+</think>
+
+<answer>
+your answer, with reference to worker IDs shown in the video
+</answer>`;
+        } else {
+          systemPromptEl.value = base;
+        }
+
+        updateTokenCounters();
+      }
+
+      reasoningToggleEl.addEventListener("change", () => {
+        setDefaultSystemPrompt();
+      });
+
+      userPromptEl.addEventListener("input", updateTokenCounters);
+      systemPromptEl.addEventListener("input", updateTokenCounters);
+
+      tempEl.addEventListener("input", () => {
+        tempLabel.textContent = tempEl.value;
+      });
+      topPEl.addEventListener("input", () => {
+        topPLabel.textContent = topPEl.value;
+      });
+      repetitionEl.addEventListener("input", () => {
+        repLabel.textContent = repetitionEl.value;
+      });
+      fpsEl.addEventListener("input", () => {
+        fpsLabel.textContent = fpsEl.value;
+      });
+
+      document
+        .querySelector(".file-drop")
+        .addEventListener("click", () => videoInput.click());
+
+      function handleFile(file) {
+        if (!file) return;
+        selectedFile = file;
+        fileNameEl.textContent = file.name;
+        fileDropText.textContent = "파일 선택됨";
+        frameStatusEl.textContent = "영상 메타데이터 읽는 중...";
+        extractedFrames = [];
+
+        const url = URL.createObjectURL(file);
+        videoElement.src = url;
+        videoPreview.style.display = "block";
+
+        hiddenVideo.src = url;
+        hiddenVideo.load();
+
+        hiddenVideo.onloadedmetadata = async () => {
+          try {
+            const fps = parseInt(fpsEl.value || "4", 10);
+            const duration = hiddenVideo.duration;
+            if (!duration || !isFinite(duration)) {
+              frameStatusEl.textContent =
+                "영상 길이를 알 수 없습니다. 그래도 단일 프레임만 전송해 보겠습니다.";
+              await extractSingleFrame();
+              return;
+            }
+
+            const approxTotal = Math.min(
+              Math.floor(duration * fps),
+              32
+            );
+            if (approxTotal <= 0) {
+              frameStatusEl.textContent =
+                "영상이 너무 짧습니다. 단일 프레임만 전송합니다.";
+              await extractSingleFrame();
+              return;
+            }
+
+            frameStatusEl.textContent = `프레임 추출 중... (최대 ${approxTotal}장)`;
+            extractedFrames = await extractFramesEvenly(
+              hiddenVideo,
+              hiddenCanvas,
+              approxTotal
+            );
+            frameStatusEl.textContent = `프레임 ${extractedFrames.length}장 추출 완료`;
+          } catch (e) {
+            console.error(e);
+            frameStatusEl.textContent =
+              "프레임 추출에 실패했습니다. 단일 프레임만 시도해 보세요.";
+          }
+        };
+      }
+
+      async function extractSingleFrame() {
+        extractedFrames = [];
+        extractedFrames = await extractFramesEvenly(hiddenVideo, hiddenCanvas, 1);
+        frameStatusEl.textContent = `단일 프레임 1장 추출 완료`;
+      }
+
+      function extractFramesEvenly(video, canvas, count) {
+        return new Promise(async (resolve, reject) => {
+          const frames = [];
+          const ctx = canvas.getContext("2d");
+          const duration = video.duration;
+          if (!duration || !isFinite(duration)) {
+            return reject(new Error("duration invalid"));
+          }
+
+          canvas.width = video.videoWidth || 640;
+          canvas.height = video.videoHeight || 360;
+
+          for (let i = 0; i < count; i++) {
+            const t = (duration * (i + 0.5)) / count;
+            await new Promise((res) => {
+              video.currentTime = t;
+              video.onseeked = () => {
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
+                frames.push(dataUrl);
+                frameStatusEl.textContent = `프레임 추출 중... (${frames.length}/${count})`;
+                res();
+              };
+            });
+          }
+
+          resolve(frames);
+        });
+      }
+
+      videoInput.addEventListener("change", (e) => {
+        const file = e.target.files && e.target.files[0];
+        handleFile(file);
+      });
+
+      setDefaultSystemPrompt();
+
+      async function runBoschSave() {
+        if (!selectedFile) {
+          alert("먼저 영상을 업로드해 주세요.");
+          return;
+        }
+
+        if (!userPromptEl.value.trim()) {
+          alert("User Prompt를 입력해 주세요.");
+          return;
+        }
+
+        if (!extractedFrames || extractedFrames.length === 0) {
+          frameStatusEl.textContent =
+            "아직 프레임이 준비되지 않았습니다. 잠시 후 다시 시도해 주세요.";
+          return;
+        }
+
+        runBtn.disabled = true;
+        runText.style.display = "none";
+        runSpinner.style.display = "inline-block";
+        outputEl.textContent = "모델 호출 중입니다...";
+        usageInfoEl.textContent = "";
+
+        try {
+          const body = {
+            frames: extractedFrames,
+            userPrompt: userPromptEl.value,
+            systemPrompt: systemPromptEl.value,
+            temperature: parseFloat(tempEl.value),
+            topP: parseFloat(topPEl.value),
+            repetitionPenalty: parseFloat(repetitionEl.value),
+            maxTokens: parseInt(maxTokensEl.value || "256", 10),
+          };
+
+          const seedVal = seedEl.value.trim();
+          if (seedVal) {
+            const num = Number(seedVal);
+            if (!Number.isNaN(num)) {
+              body.seed = num;
+            }
+          }
+
+          const res = await fetch("/api/cosmos", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(body),
+          });
+
+          const data = await res.json();
+          if (!res.ok) {
+            outputEl.textContent =
+              "오류가 발생했습니다.\n\n" +
+              (data && data.detail
+                ? data.detail
+                : JSON.stringify(data, null, 2));
+            return;
+          }
+
+          const choice =
+            data.choices && data.choices.length > 0
+              ? data.choices[0]
+              : null;
+          const content =
+            choice &&
+            choice.message &&
+            Array.isArray(choice.message.content)
+              ? choice.message.content
+              : null;
+
+          let text = "";
+          if (content) {
+            text = content
+              .filter((p) => p.type === "text" && p.text)
+              .map((p) => p.text)
+              .join("\n\n");
+          } else if (choice && choice.message && choice.message.content) {
+            text = choice.message.content;
+          } else if (data.output_text) {
+            text = data.output_text;
+          } else {
+            text = JSON.stringify(data, null, 2);
+          }
+
+          outputEl.textContent = text || "(빈 응답)";
+
+          if (data.usage) {
+            const u = data.usage;
+            usageInfoEl.textContent = `prompt: ${
+              u.prompt_tokens ?? "?"
+            }, completion: ${
+              u.completion_tokens ?? "?"
+            }, total: ${u.total_tokens ?? "?"}`;
+          }
+        } catch (err) {
+          console.error(err);
+          outputEl.textContent =
+            "클라이언트 에러가 발생했습니다.\n\n" + String(err);
+        } finally {
+          runBtn.disabled = false;
+          runText.style.display = "inline-block";
+          runSpinner.style.display = "none";
+        }
+      }
+
+      runBtn.addEventListener("click", () => {
+        runBoschSave();
+      });
+    </script>
+  </body>
+  </html>
